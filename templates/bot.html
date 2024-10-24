@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Training Chatbot</title>
+    <link rel="stylesheet" type="text/css" href="../static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="chatbox">
+            <h1>Gym Training Chatbot</h1>
+            <div id="chat-log" class="chat-log"></div>
+            <div class="chat-input-container">
+                <input type="text" id="user-input" placeholder="Type your message here..." autofocus />
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("send-btn").addEventListener("click", async function() {
+            const userInput = document.getElementById("user-input").value;
+            const chatLog = document.getElementById("chat-log");
+
+            if (userInput.trim() !== "") {
+                const userMessage = `<div class="message user-message">${userInput}</div>`;
+                chatLog.innerHTML += userMessage;
+
+                const botMessage = `<div class="message bot-message">Processing your request...</div>`;
+                chatLog.innerHTML += botMessage;
+                chatLog.scrollTop = chatLog.scrollHeight;
+
+                document.getElementById("user-input").value = "";
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ message: userInput })
+                    });
+
+                    const data = await response.json();
+
+                    chatLog.removeChild(chatLog.lastChild);
+                    const botResponse = `<div class="message bot-message">${data.response}</div>`;
+                    chatLog.innerHTML += botResponse;
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    const errorMessage = `<div class="message bot-message">Sorry, there was an error processing your request.</div>`;
+                    chatLog.innerHTML += errorMessage;
+                }
+
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
